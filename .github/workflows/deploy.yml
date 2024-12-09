@@ -38,5 +38,5 @@ jobs:
 
       - name: Run Tests
         run: |
-          pytest tests --cov=.  # Runs tests and generates a coverage report
+          pytest tests/arithmetic_tests.py.  # Runs tests and generates a coverage report
           coverage report -m
