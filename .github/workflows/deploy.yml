@@ -16,4 +16,21 @@ jobs:
           python -m pip install --upgrade pip
           pip install black
       - name: Lint code
-        run: black --check .
+        run: black .
+  test:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get code
+        uses: actions/checkout@v4
+      - name: Load and cache dependencies
+        id: cache-deps
+        uses: ./.github/actions/cached-deps
+        with:
+          caching: "true"
+      - name: Output information
+        run: echo "Cache used? ${{ steps.cache-deps.outputs}}"
+      - name: Test code
+        run: |
+          pytest tests/arithmetic_test
+          coverage report -m
