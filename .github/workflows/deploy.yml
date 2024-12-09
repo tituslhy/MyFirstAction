@@ -24,6 +24,11 @@ jobs:
           pip install black
       - name: Lint Code
         run: black .
+      - name: Upload linted code as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linted-code
+          path: .
 
   test:
     runs-on: ubuntu-latest
@@ -59,3 +64,25 @@ jobs:
           name: coverage-report
           path: coverage-report.html # Assuming you generate the HTML coverage report
 
+  build:
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download linted code artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: linted-code
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          tags: tituslhy/myfirstaction:latest
