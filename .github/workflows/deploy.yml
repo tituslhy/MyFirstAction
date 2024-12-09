@@ -25,12 +25,12 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Load and cache dependencies
+      - name: Cache and Install Dependencies
         uses: ./.github/actions/cached-deps
         with:
           caching: "true"
 
       - name: Run Tests
         run: |
-          pytest tests/arithmetic_tests.py.  # Runs tests and generates a coverage report
+          pytest tests --cov=.
           coverage report -m
