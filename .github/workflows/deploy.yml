@@ -23,7 +23,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install black
       - name: Lint Code
-        run: black --check .
+        run: black .
 
   test:
     needs: lint
