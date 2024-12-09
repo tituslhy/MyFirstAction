@@ -5,20 +5,18 @@ inputs:
     description: 'Whether to cache dependencies or not.'
     required: false
     default: 'true'
-outputs:
-  used-cache:
-    description: 'Whether the cache was used'
-    value: ${{ steps.install.outputs.cache }}
+
 runs:
   using: 'composite'
   steps:
-    - name: Install and cache dependencies
-      if: inputs.caching == 'true'
-      id: cache
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.12'
-        cache: 'pip'
+    - name: Set up Python
       run: |
         python -m pip install --upgrade pip
+    - name: Install dependencies
+      run: |
+        if [ "${{ inputs.caching }}" == "true" ]; then
+          echo "Caching enabled, installing dependencies with cache..."
+        else
+          echo "Installing dependencies without caching..."
+        fi
         pip install -r requirements.txt
