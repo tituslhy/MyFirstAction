@@ -6,5 +6,5 @@ def test_string_add():
 def test_string_remove():
     assert string_remove(
         "Hello hello!",
-        "hello"
+        " hello"
     ) == "Hello!"
