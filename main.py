@@ -1,3 +1,5 @@
+import re
+
 def add(a: int | float, b: int | float) -> int | float:
     """Adds two values.
 
@@ -87,3 +89,31 @@ def exponent(a: int | float, b: int | float) -> int | float:
         int | float
     """
     return a**b
+
+def string_add(a: str, b: str) -> str:
+    """String concatenator. Returns a concatenated string 
+    with an additional space
+
+    Args:
+        a (str) 
+        b (str)
+
+    Returns:
+        str
+    """
+    return a + " "+ b
+
+def string_remove(a: str, b: str) -> str:
+    """Removes string pattern b from a
+
+    Args:
+        a (str)
+        b (str)
+
+    Returns:
+        str
+    """
+    try:
+        return re.sub(b, '', a)
+    except Exception as e:
+        return e
