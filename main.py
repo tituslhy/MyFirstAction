@@ -116,4 +116,5 @@ def string_remove(a: str, b: str) -> str:
     try:
         return re.sub(b, '', a)
     except Exception as e:
+        print(f"Encountered exception: {e}")
         return e
