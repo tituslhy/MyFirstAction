@@ -12,6 +12,7 @@ runs:
     - name: Set up Python
       run: |
         python -m pip install --upgrade pip
+      shell: bash
     - name: Install dependencies
       run: |
         if [ "${{ inputs.caching }}" == "true" ]; then
@@ -20,3 +21,4 @@ runs:
           echo "Installing dependencies without caching..."
         fi
         pip install -r requirements.txt
+      shell: bash
