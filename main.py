@@ -2,13 +2,14 @@ def add(a: int | float, b: int | float) -> int | float:
     """Adds two values.
 
     Args:
-        a (int | float) 
+        a (int | float)
         b (int | float)
 
     Returns:
         int | float
     """
     return a + b
+
 
 def minus(a: int | float, b: int | float) -> int | float:
     """Minus operator. Deducts b from a
@@ -22,6 +23,7 @@ def minus(a: int | float, b: int | float) -> int | float:
     """
     return a - b
 
+
 def divide(a: int | float, b: int | float) -> int | float:
     """Division operator. Divides a by b
 
@@ -33,6 +35,7 @@ def divide(a: int | float, b: int | float) -> int | float:
         int | float
     """
     return a / b
+
 
 def multiply(a: int | float, b: int | float) -> int | float:
     """Multiplier operator. Multiplies a by b
@@ -46,6 +49,7 @@ def multiply(a: int | float, b: int | float) -> int | float:
     """
     return a * b
 
+
 def modulo(a: int | float, b: int | float) -> int | float:
     """Modulo operator. Returns the remainder of a/b
 
@@ -57,6 +61,7 @@ def modulo(a: int | float, b: int | float) -> int | float:
         int | float
     """
     return a % b
+
 
 def integer_divide(a: int | float, b: int | float) -> int | float:
     """Returns the integer after dividing a by b
@@ -70,6 +75,7 @@ def integer_divide(a: int | float, b: int | float) -> int | float:
     """
     return a // b
 
+
 def exponent(a: int | float, b: int | float) -> int | float:
     """Exponent operator. Returns a raised to the power of b
 
@@ -80,4 +86,4 @@ def exponent(a: int | float, b: int | float) -> int | float:
     Returns:
         int | float
     """
-    return a ** b
+    return a**b
