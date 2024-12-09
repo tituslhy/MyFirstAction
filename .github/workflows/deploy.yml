@@ -16,4 +16,4 @@ jobs:
           python -m pip install --upgrade pip
           pip install black
       - name: Lint code
-        run: black --check
+        run: black --check .
