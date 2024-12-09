@@ -45,7 +45,12 @@ jobs:
       - name: Run Tests
         run: |
           pytest tests --cov=.
-
+      - name: List files for debugging
+        run: |
+          ls -la
+          ls -la tests
+          ls -la coverage-report.html
+          ls -la coverage.xml
       - name: Upload Test Results as Artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -53,8 +58,6 @@ jobs:
           path: |
             tests/test_results.xml
             coverage.xml
-
-        # Upload coverage report as artifact
       - name: Upload Coverage Report as Artifact
         uses: actions/upload-artifact@v3
         with:
