@@ -30,11 +30,6 @@ jobs:
         with:
           caching: "true"
 
-      - name: Install pytest-cov
-        run: |
-          pip install pytest-cov
-
       - name: Run Tests
         run: |
           pytest tests --cov=.
-          coverage report -m
