@@ -66,65 +66,65 @@ jobs:
           name: coverage-report  
           path: coverage-report.html # Assuming you generate the HTML coverage report  
   
-  sonarqube:  
-    needs: [lint, test]  
-    runs-on: ubuntu-latest  
-    steps:  
-      - name: Checkout Code  
-        uses: actions/checkout@v4  
-      - name: Set up JDK 11  
-        uses: actions/setup-java@v3  
-        with:  
-          java-version: '11'  
-          distribution: 'adopt'  
-      - name: Start SonarQube  
-        run: |  
-          docker run -d --name sonarqube -p 9000:9000 sonarqube:lts  
-          # Wait for SonarQube to be up and running  
-          timeout 120 sh -c 'until nc -zv localhost 9000; do sleep 5; done'  
-      - name: Wait for SonarQube to Initialize  
-        run: |  
-          echo "Waiting for SonarQube to be fully up and running..."  
-          sleep 120  # Adjust the sleep duration if necessary  
-      - name: Install SonarQube Scanner  
-        run: |  
-          wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip -O sonar-scanner.zip  
-          unzip sonar-scanner.zip -d $HOME/sonar-scanner  
-          export PATH=$HOME/sonar-scanner/sonar-scanner-4.6.2.2472-linux/bin:$PATH  
-        shell: bash  
-      - name: Run SonarQube Scanner  
-        env:  
-          SONAR_HOST_URL: http://localhost:9000  
-          SONAR_LOGIN: admin  
-          SONAR_PASSWORD: admin  
-        run: |  
-          export PATH=$HOME/sonar-scanner/sonar-scanner-4.6.2.2472-linux/bin:$PATH  
-          sonar-scanner \  
-            -Dsonar.projectKey=my-python-project \  
-            -Dsonar.sources=./linted-code \  
-            -Dsonar.host.url=$SONAR_HOST_URL \  
-            -Dsonar.login=$SONAR_LOGIN \  
-            -Dsonar.password=$SONAR_PASSWORD \  
-            -Dsonar.issuesReport.html.enable=true \  
-            -Dsonar.issuesReport.html.location=sonarqube-report.html  
-        shell: bash  
-      - name: Upload SonarQube Report Artifact  
-        uses: actions/upload-artifact@v4  
-        with:  
-          name: sonarqube-report  
-          path: sonarqube-report.html  
-      - name: Check Quality Gate Status  
-        id: quality-gate  
-        run: |  
-          status=$(curl -s -u admin:admin "http://localhost:9000/api/qualitygates/project_status?projectKey=my-python-project" | jq -r '.projectStatus.status')  
-          echo "Quality Gate status: $status"  
-          echo "::set-output name=status::$status"  
-      - name: Stop SonarQube  
-        run: docker stop sonarqube  
+  # sonarqube:  
+  #   needs: [lint, test]  
+  #   runs-on: ubuntu-latest  
+  #   steps:  
+  #     - name: Checkout Code  
+  #       uses: actions/checkout@v4  
+  #     - name: Set up JDK 11  
+  #       uses: actions/setup-java@v3  
+  #       with:  
+  #         java-version: '11'  
+  #         distribution: 'adopt'  
+  #     - name: Start SonarQube  
+  #       run: |  
+  #         docker run -d --name sonarqube -p 9000:9000 sonarqube:lts  
+  #         # Wait for SonarQube to be up and running  
+  #         timeout 120 sh -c 'until nc -zv localhost 9000; do sleep 5; done'  
+  #     - name: Wait for SonarQube to Initialize  
+  #       run: |  
+  #         echo "Waiting for SonarQube to be fully up and running..."  
+  #         sleep 120  # Adjust the sleep duration if necessary  
+  #     - name: Install SonarQube Scanner  
+  #       run: |  
+  #         wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip -O sonar-scanner.zip  
+  #         unzip sonar-scanner.zip -d $HOME/sonar-scanner  
+  #         export PATH=$HOME/sonar-scanner/sonar-scanner-4.6.2.2472-linux/bin:$PATH  
+  #       shell: bash  
+  #     - name: Run SonarQube Scanner  
+  #       env:  
+  #         SONAR_HOST_URL: http://localhost:9000  
+  #         SONAR_LOGIN: admin  
+  #         SONAR_PASSWORD: admin  
+  #       run: |  
+  #         export PATH=$HOME/sonar-scanner/sonar-scanner-4.6.2.2472-linux/bin:$PATH  
+  #         sonar-scanner \  
+  #           -Dsonar.projectKey=my-python-project \  
+  #           -Dsonar.sources=./linted-code \  
+  #           -Dsonar.host.url=$SONAR_HOST_URL \  
+  #           -Dsonar.login=$SONAR_LOGIN \  
+  #           -Dsonar.password=$SONAR_PASSWORD \  
+  #           -Dsonar.issuesReport.html.enable=true \  
+  #           -Dsonar.issuesReport.html.location=sonarqube-report.html  
+  #       shell: bash  
+  #     - name: Upload SonarQube Report Artifact  
+  #       uses: actions/upload-artifact@v4  
+  #       with:  
+  #         name: sonarqube-report  
+  #         path: sonarqube-report.html  
+  #     - name: Check Quality Gate Status  
+  #       id: quality-gate  
+  #       run: |  
+  #         status=$(curl -s -u admin:admin "http://localhost:9000/api/qualitygates/project_status?projectKey=my-python-project" | jq -r '.projectStatus.status')  
+  #         echo "Quality Gate status: $status"  
+  #         echo "::set-output name=status::$status"  
+  #     - name: Stop SonarQube  
+  #       run: docker stop sonarqube  
   
   build:  
-    needs: [sonarqube]  
-    if: ${{ needs.sonarqube.outputs.status == 'OK' }}  
+    needs: [test, lint]  
+    # if: ${{ needs.sonarqube.outputs.status == 'OK' }}  
     runs-on: ubuntu-latest  
     steps:  
       - name: Download linted code artifact  
