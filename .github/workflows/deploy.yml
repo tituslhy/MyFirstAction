@@ -1,155 +1,118 @@
-name: Deployment  
-  
-on:  
-  pull_request:  
-  workflow_dispatch:  
-  push:  
-    branches:  
-      - main  
-  
-jobs:  
-  lint:  
-    runs-on: ubuntu-latest  
-    steps:  
-      - name: Checkout Code  
-        uses: actions/checkout@v4  
-      - name: Cache and Install Dependencies  
-        id: cache-deps  
-        uses: ./.github/actions/cached-deps  
-        with:  
-          caching: "true"  
-      - name: Output information  
-        run: echo "Cache setting - ${{ steps.cache-deps.outputs.used-cache}}"  
-      - name: Install black  
-        run: |  
+name: Deployment
+
+on:
+  pull_request:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Cache and Install Dependencies
+        id: cache-deps
+        uses: ./.github/actions/cached-deps
+        with:
+          caching: "true"
+      - name: Output information
+        run: echo "Cache setting - ${{ steps.cache-deps.outputs.used-cache}}"
+      - name: Install black
+        run: |
           python -m pip install --upgrade pip  
-          pip install black  
-      - name: Lint Code  
-        run: black .  
-      - name: Upload linted code as artifact  
-        uses: actions/upload-artifact@v4  
-        with:  
-          name: linted-code  
-          path: .  
-  
-  test:  
-    runs-on: ubuntu-latest  
-    steps:  
-      - name: Checkout Code  
-        uses: actions/checkout@v4  
-      - name: Cache and Install Dependencies  
-        id: cache-deps  
-        uses: ./.github/actions/cached-deps  
-        with:  
-          caching: "true"  
-      - name: Output information  
-        run: echo "Cache setting - ${{ steps.cache-deps.outputs.used-cache}}"  
-      - name: Run Tests  
-        run: |  
-          pytest tests --cov=tests --cov-report=xml:coverage.xml --cov-report=html:coverage-report.html  
-      - name: List files for debugging  
-        run: |  
+          pip install black
+      - name: Lint Code
+        run: black .
+      - name: Upload linted code as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linted-code
+          path: .
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Cache and Install Dependencies
+        id: cache-deps
+        uses: ./.github/actions/cached-deps
+        with:
+          caching: "true"
+      - name: Output information
+        run: echo "Cache setting - ${{ steps.cache-deps.outputs.used-cache}}"
+      - name: Run Tests
+        run: |
+          pytest tests --cov=tests --cov-report=xml:coverage.xml --cov-report=html:coverage-report.html
+      - name: List files for debugging
+        run: |
           ls -la  
           ls -la tests  
           ls -la coverage-report.html  
-          ls -la coverage.xml  
-      - name: Upload Test Results as Artifacts  
-        uses: actions/upload-artifact@v4  
-        with:  
-          name: test-results  
-          path: |  
+          ls -la coverage.xml
+      - name: Upload Test Results as Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
             tests/test_results.xml  
-            coverage.xml  
-      - name: Upload Coverage Report as Artifact  
-        uses: actions/upload-artifact@v4  
-        with:  
-          name: coverage-report  
-          path: coverage-report.html # Assuming you generate the HTML coverage report  
-  
-  # sonarqube:  
-  #   needs: [lint, test]  
-  #   runs-on: ubuntu-latest  
-  #   steps:  
-  #     - name: Checkout Code  
-  #       uses: actions/checkout@v4  
-  #     - name: Set up JDK 11  
-  #       uses: actions/setup-java@v3  
-  #       with:  
-  #         java-version: '11'  
-  #         distribution: 'adopt'  
-  #     - name: Start SonarQube  
-  #       run: |  
-  #         docker run -d --name sonarqube -p 9000:9000 sonarqube:lts  
-  #         # Wait for SonarQube to be up and running  
-  #         timeout 120 sh -c 'until nc -zv localhost 9000; do sleep 5; done'  
-  #     - name: Wait for SonarQube to Initialize  
-  #       run: |  
-  #         echo "Waiting for SonarQube to be fully up and running..."  
-  #         sleep 120  # Adjust the sleep duration if necessary  
-  #     - name: Install SonarQube Scanner  
-  #       run: |  
-  #         wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip -O sonar-scanner.zip  
-  #         unzip sonar-scanner.zip -d $HOME/sonar-scanner  
-  #         export PATH=$HOME/sonar-scanner/sonar-scanner-4.6.2.2472-linux/bin:$PATH  
-  #       shell: bash  
-  #     - name: Run SonarQube Scanner  
-  #       env:  
-  #         SONAR_HOST_URL: http://localhost:9000  
-  #         SONAR_LOGIN: admin  
-  #         SONAR_PASSWORD: admin  
-  #       run: |  
-  #         export PATH=$HOME/sonar-scanner/sonar-scanner-4.6.2.2472-linux/bin:$PATH  
-  #         sonar-scanner \  
-  #           -Dsonar.projectKey=my-python-project \  
-  #           -Dsonar.sources=./linted-code \  
-  #           -Dsonar.host.url=$SONAR_HOST_URL \  
-  #           -Dsonar.login=$SONAR_LOGIN \  
-  #           -Dsonar.password=$SONAR_PASSWORD \  
-  #           -Dsonar.issuesReport.html.enable=true \  
-  #           -Dsonar.issuesReport.html.location=sonarqube-report.html  
-  #       shell: bash  
-  #     - name: Upload SonarQube Report Artifact  
-  #       uses: actions/upload-artifact@v4  
-  #       with:  
-  #         name: sonarqube-report  
-  #         path: sonarqube-report.html  
-  #     - name: Check Quality Gate Status  
-  #       id: quality-gate  
-  #       run: |  
-  #         status=$(curl -s -u admin:admin "http://localhost:9000/api/qualitygates/project_status?projectKey=my-python-project" | jq -r '.projectStatus.status')  
-  #         echo "Quality Gate status: $status"  
-  #         echo "::set-output name=status::$status"  
-  #     - name: Stop SonarQube  
-  #       run: docker stop sonarqube  
-  
-  build:  
-    needs: [test, lint]  
-    # if: ${{ needs.sonarqube.outputs.status == 'OK' }}  
-    runs-on: ubuntu-latest  
-    steps:  
-      - name: Download linted code artifact  
-        uses: actions/download-artifact@v4  
-        with:  
-          name: linted-code  
-      - name: Extract Docker image metadata  
-        id: meta  
-        uses: docker/metadata-action@v5  
-        with:  
-          images: ${{ secrets.DOCKERHUB_USERNAME }}/myfirstaction  
-      - name: Login to Docker Hub  
-        uses: docker/login-action@v3  
-        with:  
-          username: ${{ secrets.DOCKERHUB_USERNAME }}  
-          password: ${{ secrets.DOCKERHUB_TOKEN }}  
-      - name: Setup Docker Buildx  
-        uses: docker/setup-buildx-action@v3  
-        with:  
-          driver-opts: |  
+            coverage.xml
+      - name: Upload Coverage Report as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage-report.html
+
+  codeql:
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download linted code artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: linted-code
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: "python"
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+      - name: Upload CodeQL Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: codeql-report
+          path: ./codeql
+
+  build:
+    needs: codeql
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download linted code artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: linted-code
+      - name: Extract Docker image metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/myfirstaction
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: |
             image=moby/buildkit:master  
-            network=host  
-      - name: Build and push Docker image  
-        uses: docker/build-push-action@v6  
-        with:  
-          push: ${{ github.event_name != 'pull_request' }}  
-          tags: ${{ steps.meta.outputs.tags }}  
-          annotations: ${{ steps.meta.outputs.annotations }}  
+            network=host
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          annotations: ${{ steps.meta.outputs.annotations }}
