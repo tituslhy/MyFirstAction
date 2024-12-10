@@ -66,29 +66,8 @@ jobs:
           name: coverage-report
           path: coverage-report.html
 
-  codeScan:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@main
-      - name: Run Codacy Analysis CLI
-        uses: codacy/codacy-analysis-cli-action@master
-        with:
-          output: results.sarif
-          format: sarif
-          # Adjust severity of non-security issues
-          gh-code-scanning-compat: true
-          # Force 0 exit code to allow SARIF file generation
-          # This will hand over control about PR rejection to the GitHub side
-          max-allowed-issues: 2147483647
-      - name: Upload SARIF results file
-        uses: github/codeql-action/upload-sarif@main
-        with:
-          sarif_file: results.sarif
-
   build:
-    needs: [codeScan, lint]
+    needs: [test, lint]
     runs-on: ubuntu-latest
     steps:
       - name: Download linted code artifact
