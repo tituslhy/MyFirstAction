@@ -116,7 +116,7 @@ jobs:
         with:
           category: "/language:${{matrix.language}}"
   build:
-    needs: [test, lint]
+    needs: [lint, codescan]
     runs-on: ubuntu-latest
     steps:
       - name: Download linted code artifact
