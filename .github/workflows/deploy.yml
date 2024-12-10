@@ -66,28 +66,24 @@ jobs:
           name: coverage-report
           path: coverage-report.html
 
-  codeql:
+  codeScan:
     needs: test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+      - name: Run Codacy Analysis CLI
+        uses: codacy/codacy-analysis-cli-action@master
         with:
-          fetch-depth: 0
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
+          output: results.sarif
+          format: sarif
+      - name: Upload SARIF results file
+        uses: github/codeql-action/upload-sarif@main
         with:
-          languages: "python"
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
-      - name: Upload CodeQL Results
-        uses: actions/upload-artifact@v4
-        with:
-          name: codeql-report
-          path: ./codeql
+          sarif_file: results.sarif
 
   build:
-    needs: [codeql, lint]
+    needs: [codeScan, lint]
     runs-on: ubuntu-latest
     steps:
       - name: Download linted code artifact
