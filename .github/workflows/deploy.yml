@@ -67,13 +67,13 @@ jobs:
           path: coverage-report.html
 
   codeql:
-    needs: [lint, test]
+    needs: test
     runs-on: ubuntu-latest
     steps:
-      - name: Download linted code artifact
-        uses: actions/download-artifact@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
         with:
-          name: linted-code
+          fetch-depth: 0
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
         with:
@@ -87,7 +87,7 @@ jobs:
           path: ./codeql
 
   build:
-    needs: codeql
+    needs: [codeql, lint]
     runs-on: ubuntu-latest
     steps:
       - name: Download linted code artifact
